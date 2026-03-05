@@ -6,7 +6,7 @@ import { PCPartMesh } from "@/components/pc-3d/pc-part-mesh"
 
 function CompletedPC() {
   return (
-    <group position={[0, -0.5, 0]}>
+    <group position={[0, 0, 0]}>
       {PC_PARTS.map((part) => (
         <PCPartMesh
           key={part.id}
@@ -25,6 +25,8 @@ export default function CompleteScene() {
   const [modules, setModules] = useState<any>(null)
 
   useEffect(() => {
+    if (typeof window === 'undefined') return
+    
     Promise.all([
       import("@react-three/fiber"),
       import("@react-three/drei"),
@@ -34,9 +36,9 @@ export default function CompleteScene() {
         OrbitControls: drei.OrbitControls,
         Environment: drei.Environment,
         ContactShadows: drei.ContactShadows,
-        Float: drei.Float,
-        Text: drei.Text,
       })
+    }).catch((error) => {
+      console.error("Error loading Three.js modules:", error)
     })
   }, [])
 
@@ -48,10 +50,10 @@ export default function CompleteScene() {
     )
   }
 
-  const { Canvas, OrbitControls, Environment, ContactShadows, Float, Text } = modules
+  const { Canvas, OrbitControls, Environment, ContactShadows } = modules
 
   return (
-    <Canvas camera={{ position: [4, 3, 4], fov: 45 }}>
+    <Canvas camera={{ position: [8, 5, 8], fov: 45 }}>
       <Suspense fallback={null}>
         <Environment preset="studio" />
         <ambientLight intensity={0.3} />
@@ -60,32 +62,17 @@ export default function CompleteScene() {
 
         <CompletedPC />
 
-        <Float speed={2} rotationIntensity={0.1} floatIntensity={0.8}>
-          <Text
-            position={[0, 2.8, 0]}
-            fontSize={0.25}
-            color="#4ade80"
-            anchorX="center"
-            anchorY="middle"
-            font="/fonts/Geist-Bold.ttf"
-          >
-            {"PC Completada!"}
-          </Text>
-        </Float>
-
         <ContactShadows
           position={[0, -2.5, 0]}
           opacity={0.4}
-          scale={10}
+          scale={20}
           blur={2}
         />
 
         <OrbitControls
           enablePan={false}
-          autoRotate
-          autoRotateSpeed={1.5}
-          minDistance={3}
-          maxDistance={8}
+          minDistance={5}
+          maxDistance={15}
         />
       </Suspense>
     </Canvas>

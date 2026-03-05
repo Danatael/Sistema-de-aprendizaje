@@ -2,37 +2,22 @@
 
 import dynamic from "next/dynamic"
 import { useGameStore } from "@/lib/game-store"
-
-const LandingPage = dynamic(
-  () => import("@/components/game/landing-page").then((m) => ({ default: m.LandingPage })),
-  { ssr: false, loading: () => <LoadingScreen /> }
-)
+import { LandingPage } from "@/components/game/landing-page"
 
 const AssemblyPage = dynamic(
   () => import("@/components/game/assembly-page").then((m) => ({ default: m.AssemblyPage })),
-  { ssr: false, loading: () => <LoadingScreen /> }
+  { ssr: false }
 )
 
 const QuizPanel = dynamic(
   () => import("@/components/game/quiz-panel").then((m) => ({ default: m.QuizPanel })),
-  { ssr: false, loading: () => <LoadingScreen /> }
+  { ssr: false }
 )
 
 const CompleteScreen = dynamic(
   () => import("@/components/game/complete-screen").then((m) => ({ default: m.CompleteScreen })),
-  { ssr: false, loading: () => <LoadingScreen /> }
+  { ssr: false }
 )
-
-function LoadingScreen() {
-  return (
-    <div className="flex h-screen items-center justify-center bg-background">
-      <div className="flex flex-col items-center gap-4">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-        <p className="text-sm text-muted-foreground">Cargando...</p>
-      </div>
-    </div>
-  )
-}
 
 export default function Home() {
   const { currentView, setView } = useGameStore()

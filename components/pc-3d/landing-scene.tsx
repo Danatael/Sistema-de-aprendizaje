@@ -22,11 +22,11 @@ function LandingScene() {
       if (cancelled || !containerRef.current) return
 
       const scene = new THREE.Scene()
-      scene.background = new THREE.Color("#0d0d1a")
-      scene.fog = new THREE.FogExp2("#0d0d1a", 0.08)
+      scene.background = new THREE.Color("#0f0f1a")
+      scene.fog = new THREE.FogExp2("#0f0f1a", 0.06)
 
       const camera = new THREE.PerspectiveCamera(50, containerRef.current.clientWidth / containerRef.current.clientHeight, 0.1, 100)
-      camera.position.set(0, 0, 6)
+      camera.position.set(3, 1, 5)
 
       const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
       renderer.setSize(containerRef.current.clientWidth, containerRef.current.clientHeight)
@@ -35,18 +35,18 @@ function LandingScene() {
       containerRef.current.appendChild(renderer.domElement)
 
       // Lights
-      const ambient = new THREE.AmbientLight(0xffffff, 0.2)
+      const ambient = new THREE.AmbientLight(0xffffff, 0.5)
       scene.add(ambient)
-      const dir = new THREE.DirectionalLight(0xffffff, 0.5)
+      const dir = new THREE.DirectionalLight(0xffffff, 1)
       dir.position.set(5, 5, 5)
       scene.add(dir)
-      const green = new THREE.PointLight(0x4ade80, 0.8, 20)
+      const green = new THREE.PointLight(0x4ade80, 1.2, 25)
       green.position.set(-3, 2, -3)
       scene.add(green)
-      const orange = new THREE.PointLight(0xf5a623, 0.4, 20)
+      const orange = new THREE.PointLight(0xf5a623, 0.6, 25)
       orange.position.set(3, -1, 3)
       scene.add(orange)
-      const spot = new THREE.SpotLight(0x4ade80, 0.4, 15, 0.5)
+      const spot = new THREE.SpotLight(0x4ade80, 0.8, 20, 0.5)
       spot.position.set(0, 5, 0)
       scene.add(spot)
 
@@ -67,101 +67,166 @@ function LandingScene() {
       const mainGroup = new THREE.Group()
       scene.add(mainGroup)
 
-      // GPU
-      const gpuGroup = new THREE.Group()
-      gpuGroup.position.set(2, 0.5, 0)
-      gpuGroup.rotation.set(0.2, 0.5, 0.1)
-      const gpuBody = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.15, 0.5), darkMetal)
-      gpuGroup.add(gpuBody)
+      // PC Case (Gabinete)
+      const pcCase = new THREE.Group()
+      
+      // Panel trasero
+      const backPanel = new THREE.Mesh(
+        new THREE.BoxGeometry(2.2, 4, 0.05),
+        new THREE.MeshStandardMaterial({ color: 0x1e1e30, metalness: 0.8, roughness: 0.2 })
+      )
+      backPanel.position.set(0, 0, -1)
+      pcCase.add(backPanel)
+
+      // Panel izquierdo
+      const leftPanel = new THREE.Mesh(
+        new THREE.BoxGeometry(0.05, 4, 2),
+        new THREE.MeshStandardMaterial({ color: 0x24243a, metalness: 0.7, roughness: 0.3 })
+      )
+      leftPanel.position.set(-1.1, 0, 0)
+      pcCase.add(leftPanel)
+
+      // Panel derecho (cristal templado)
+      const rightPanel = new THREE.Mesh(
+        new THREE.BoxGeometry(0.05, 4, 2),
+        new THREE.MeshStandardMaterial({ 
+          color: 0x1a1a2e, 
+          transparent: true, 
+          opacity: 0.3,
+          metalness: 0.9, 
+          roughness: 0.1 
+        })
+      )
+      rightPanel.position.set(1.1, 0, 0)
+      pcCase.add(rightPanel)
+
+      // Panel superior
+      const topPanel = new THREE.Mesh(
+        new THREE.BoxGeometry(2.2, 0.05, 2),
+        new THREE.MeshStandardMaterial({ color: 0x20203a, metalness: 0.7, roughness: 0.3 })
+      )
+      topPanel.position.set(0, 2, 0)
+      pcCase.add(topPanel)
+
+      // Panel inferior
+      const bottomPanel = new THREE.Mesh(
+        new THREE.BoxGeometry(2.2, 0.05, 2),
+        new THREE.MeshStandardMaterial({ color: 0x1a1a2e, metalness: 0.7, roughness: 0.3 })
+      )
+      bottomPanel.position.set(0, -2, 0)
+      pcCase.add(bottomPanel)
+
+      // Panel frontal (con ventilación)
+      const frontTop = new THREE.Mesh(
+        new THREE.BoxGeometry(2.2, 1.5, 0.05),
+        new THREE.MeshStandardMaterial({ color: 0x1a1a2e, metalness: 0.6, roughness: 0.4 })
+      )
+      frontTop.position.set(0, 1, 1)
+      pcCase.add(frontTop)
+
+      const frontBottom = new THREE.Mesh(
+        new THREE.BoxGeometry(2.2, 2, 0.05),
+        new THREE.MeshStandardMaterial({ color: 0x0d0d1a, metalness: 0.5, roughness: 0.5 })
+      )
+      frontBottom.position.set(0, -1, 1)
+      pcCase.add(frontBottom)
+
+      // Componentes internos visibles (motherboard)
+      const mobo = new THREE.Mesh(
+        new THREE.BoxGeometry(1.8, 0.04, 1.5),
+        moboGreen
+      )
+      mobo.position.set(0, -0.5, -0.3)
+      mobo.rotation.y = Math.PI / 16
+      pcCase.add(mobo)
+
+      // GPU visible
+      const gpu = new THREE.Mesh(
+        new THREE.BoxGeometry(1.2, 0.15, 0.5),
+        darkMetal
+      )
+      gpu.position.set(0.2, -0.3, 0.2)
+      gpu.rotation.y = Math.PI / 16
+      pcCase.add(gpu)
+
+      // Ventiladores GPU
       for (const x of [-0.2, 0.2]) {
-        const fan = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.02, 20), new THREE.MeshStandardMaterial({ color: 0x1a1a2e }))
-        fan.position.set(x, 0.08, 0)
-        gpuGroup.add(fan)
+        const fan = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.12, 0.12, 0.02, 20),
+          fanGrey
+        )
+        fan.position.set(0.2 + x, -0.15, 0.2)
+        fan.rotation.x = Math.PI / 2
+        fan.rotation.z = Math.PI / 16
+        pcCase.add(fan)
       }
-      mainGroup.add(gpuGroup)
 
-      // CPU
-      const cpuGroup = new THREE.Group()
-      cpuGroup.position.set(-1.5, 1, 1)
-      cpuGroup.rotation.set(0.3, -0.4, 0.1)
-      cpuGroup.add(new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.08), silverMetal))
-      const ihs = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.35, 0.03), chromeIHS)
-      ihs.position.z = 0.05
-      cpuGroup.add(ihs)
-      mainGroup.add(cpuGroup)
-
-      // RAM
-      const ramGroup = new THREE.Group()
-      ramGroup.position.set(0, -0.8, 2)
-      ramGroup.rotation.set(0.1, 0.8, -0.2)
-      ramGroup.add(new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.8, 0.3), pcbGreen))
-      const ramHeat = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.05, 0.32), ramTop)
-      ramHeat.position.y = 0.42
-      ramGroup.add(ramHeat)
-      mainGroup.add(ramGroup)
-
-      // Motherboard
-      const moboGroup = new THREE.Group()
-      moboGroup.position.set(-2, -0.5, -1)
-      moboGroup.rotation.set(0.5, 0.3, -0.1)
-      moboGroup.add(new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.2, 0.04), moboGreen))
-      const cpuSocket = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.2, 0.015), socketGrey)
-      cpuSocket.position.set(0, 0.2, 0.025)
-      moboGroup.add(cpuSocket)
-      for (const y of [0, 0.1, -0.1, -0.3]) {
-        const trace = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.003, 0.001), traceMat)
-        trace.position.set(0.2, y, 0.025)
-        moboGroup.add(trace)
+      // RAM sticks
+      for (let i = 0; i < 2; i++) {
+        const ram = new THREE.Mesh(
+          new THREE.BoxGeometry(0.1, 0.8, 0.3),
+          pcbGreen
+        )
+        ram.position.set(-0.3 + i * 0.2, 0.3, -0.3)
+        ram.rotation.y = Math.PI / 16
+        pcCase.add(ram)
+        
+        const ramHeat = new THREE.Mesh(
+          new THREE.BoxGeometry(0.12, 0.6, 0.32),
+          ramTop
+        )
+        ramHeat.position.set(-0.3 + i * 0.2, 0.3, -0.3)
+        ramHeat.rotation.y = Math.PI / 16
+        pcCase.add(ramHeat)
       }
-      mainGroup.add(moboGroup)
 
-      // SSD
-      const ssdGroup = new THREE.Group()
-      ssdGroup.position.set(1, 1.5, -1.5)
-      ssdGroup.rotation.set(-0.3, 0.7, 0.2)
-      ssdGroup.add(new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.04, 0.25), ssdBlue))
-      const nand = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.01, 0.15), chipBlack)
-      nand.position.y = 0.025
-      ssdGroup.add(nand)
-      mainGroup.add(ssdGroup)
+      // Cooler CPU
+      const cooler = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.25, 0.25, 0.08, 24),
+        fanGrey
+      )
+      cooler.position.set(-0.4, 0.8, -0.2)
+      cooler.rotation.x = Math.PI / 2
+      pcCase.add(cooler)
 
-      // Cooler
-      const coolerGroup = new THREE.Group()
-      coolerGroup.position.set(-0.5, 1.8, 0.5)
-      coolerGroup.rotation.set(0.4, -0.2, 0.3)
-      coolerGroup.add(new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.08), frameDark))
-      coolerGroup.add(new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.06, 20), fanGrey))
-      mainGroup.add(coolerGroup)
+      // LED strips (tira LED verde)
+      const ledStrip1 = new THREE.Mesh(
+        new THREE.BoxGeometry(0.02, 3.5, 0.05),
+        new THREE.MeshStandardMaterial({ 
+          color: 0x4ade80, 
+          emissive: 0x4ade80, 
+          emissiveIntensity: 1 
+        })
+      )
+      ledStrip1.position.set(1, 0, 0.8)
+      pcCase.add(ledStrip1)
+
+      mainGroup.add(pcCase)
 
       // Particles
       const particleGeom = new THREE.BufferGeometry()
-      const count = 200
+      const count = 100
       const positions = new Float32Array(count * 3)
       for (let i = 0; i < count * 3; i++) {
-        positions[i] = (Math.random() - 0.5) * 12
+        positions[i] = (Math.random() - 0.5) * 15
       }
       particleGeom.setAttribute("position", new THREE.BufferAttribute(positions, 3))
-      const particleMat = new THREE.PointsMaterial({ color: 0x4ade80, size: 0.02, transparent: true, opacity: 0.6 })
+      const particleMat = new THREE.PointsMaterial({ color: 0x4ade80, size: 0.015, transparent: true, opacity: 0.4 })
       scene.add(new THREE.Points(particleGeom, particleMat))
 
       // Controls
       const controls = new OrbitControls(camera, renderer.domElement)
       controls.enableZoom = false
       controls.enablePan = false
-      controls.autoRotate = true
-      controls.autoRotateSpeed = 0.3
+      controls.autoRotate = false
       controls.maxPolarAngle = Math.PI / 1.8
       controls.minPolarAngle = Math.PI / 3
 
       sceneRef.current = { scene, camera, renderer, controls, mainGroup }
 
-      const clock = new THREE.Clock()
-
       function animate() {
         if (cancelled) return
         requestAnimationFrame(animate)
-        const t = clock.getElapsedTime()
-        mainGroup.rotation.y = t * 0.15
         controls.update()
         renderer.render(scene, camera)
       }

@@ -8,14 +8,7 @@ import { Gamepad2, BookOpen, Cpu, Wrench, Brain } from "lucide-react"
 
 const LandingScene = dynamic(
   () => import("@/components/pc-3d/landing-scene"),
-  { 
-    ssr: false,
-    loading: () => (
-      <div className="absolute inset-0 flex items-center justify-center bg-background">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-      </div>
-    )
-  }
+  { ssr: false }
 )
 
 export function LandingPage() {

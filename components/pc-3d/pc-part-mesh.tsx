@@ -14,7 +14,7 @@ interface PCPartMeshProps {
 
 function CaseMesh() {
   return (
-    <group>
+    <group scale={2.5}>
       {/* Back panel */}
       <mesh position={[0, 0, -0.5]}>
         <boxGeometry args={[1, 1, 0.02]} />
@@ -230,52 +230,52 @@ function StorageMesh() {
 
 function MotherboardMesh() {
   return (
-    <group>
+    <group scale={[2.3, 2.3, 1]}>
       {/* Main PCB */}
       <mesh>
-        <boxGeometry args={[1, 1, 0.05]} />
+        <boxGeometry args={[1, 1, 0.15]} />
         <meshStandardMaterial color="#0d4a2d" metalness={0.3} roughness={0.7} />
       </mesh>
       {/* CPU Socket */}
-      <mesh position={[0, 0.2, 0.03]}>
-        <boxGeometry args={[0.25, 0.25, 0.02]} />
+      <mesh position={[0, 0.2, 0.08]}>
+        <boxGeometry args={[0.15, 0.15, 0.02]} />
         <meshStandardMaterial color="#888" metalness={0.9} roughness={0.1} />
       </mesh>
       {/* RAM Slots */}
-      {[0.32, 0.38, 0.44].map((x, i) => (
-        <mesh key={i} position={[x, 0.2, 0.03]}>
-          <boxGeometry args={[0.03, 0.5, 0.03]} />
+      {[0.25, 0.3, 0.35].map((x, i) => (
+        <mesh key={i} position={[x, 0.2, 0.08]}>
+          <boxGeometry args={[0.02, 0.4, 0.03]} />
           <meshStandardMaterial color="#222" metalness={0.5} roughness={0.5} />
         </mesh>
       ))}
       {/* PCIe Slots */}
-      <mesh position={[0, -0.15, 0.03]}>
-        <boxGeometry args={[0.65, 0.04, 0.02]} />
+      <mesh position={[0, -0.15, 0.08]}>
+        <boxGeometry args={[0.5, 0.03, 0.02]} />
         <meshStandardMaterial color="#222" metalness={0.5} roughness={0.5} />
       </mesh>
-      <mesh position={[0, -0.3, 0.03]}>
-        <boxGeometry args={[0.45, 0.03, 0.02]} />
+      <mesh position={[0, -0.25, 0.08]}>
+        <boxGeometry args={[0.35, 0.02, 0.02]} />
         <meshStandardMaterial color="#222" metalness={0.5} roughness={0.5} />
       </mesh>
       {/* Chipset heatsink */}
-      <mesh position={[-0.2, -0.2, 0.04]}>
-        <boxGeometry args={[0.15, 0.15, 0.04]} />
+      <mesh position={[-0.15, -0.15, 0.09]}>
+        <boxGeometry args={[0.12, 0.12, 0.03]} />
         <meshStandardMaterial color="#555" metalness={0.8} roughness={0.2} />
       </mesh>
       {/* I/O Panel */}
-      <mesh position={[-0.45, 0.35, 0.03]}>
-        <boxGeometry args={[0.12, 0.25, 0.06]} />
+      <mesh position={[-0.45, 0.4, 0.08]}>
+        <boxGeometry args={[0.05, 0.2, 0.05]} />
         <meshStandardMaterial color="#333" metalness={0.6} roughness={0.4} />
       </mesh>
       {/* VRM Heatsink */}
-      <mesh position={[-0.1, 0.45, 0.04]}>
-        <boxGeometry args={[0.6, 0.08, 0.04]} />
+      <mesh position={[-0.05, 0.48, 0.09]}>
+        <boxGeometry args={[0.4, 0.06, 0.03]} />
         <meshStandardMaterial color="#666" metalness={0.8} roughness={0.2} />
       </mesh>
       {/* Traces (decorative lines) */}
       {[0.05, 0.15, -0.05, -0.35].map((y, i) => (
-        <mesh key={i} position={[0.1 * (i % 2 === 0 ? 1 : -1), y, 0.026]}>
-          <boxGeometry args={[0.3, 0.003, 0.001]} />
+        <mesh key={i} position={[0.08 * (i % 2 === 0 ? 1 : -1), y, 0.076]}>
+          <boxGeometry args={[0.25, 0.002, 0.001]} />
           <meshStandardMaterial color="#2e7d32" emissive="#4ade80" emissiveIntensity={0.3} />
         </mesh>
       ))}
@@ -353,11 +353,21 @@ export function PCPartMesh({
     <group
       ref={groupRef}
       position={part.position}
-      scale={[
-        part.scale[0] / (part.shape === "case" ? 3 : Math.max(...part.scale)),
-        part.scale[1] / (part.shape === "case" ? 4 : Math.max(...part.scale)),
-        part.scale[2] / (part.shape === "case" ? 2 : Math.max(...part.scale)),
-      ]}
+      scale={
+        part.shape === "case" 
+          ? [
+              part.scale[0] / 3,
+              part.scale[1] / 4,
+              part.scale[2] / 2,
+            ]
+          : part.shape === "box"
+          ? [1, 1, 1]
+          : [
+              part.scale[0] / Math.max(...part.scale),
+              part.scale[1] / Math.max(...part.scale),
+              part.scale[2] / Math.max(...part.scale),
+            ]
+      }
       onClick={(e) => {
         e.stopPropagation()
         onSelect()
@@ -376,11 +386,15 @@ export function PCPartMesh({
         <group>
           <mesh>
             <boxGeometry
-              args={[
-                part.scale[0] / Math.max(...part.scale),
-                part.scale[1] / Math.max(...part.scale),
-                part.scale[2] / Math.max(...part.scale),
-              ]}
+              args={
+                part.shape === "box" 
+                  ? [part.scale[0], part.scale[1], part.scale[2]]
+                  : [
+                      part.scale[0] / Math.max(...part.scale),
+                      part.scale[1] / Math.max(...part.scale),
+                      part.scale[2] / Math.max(...part.scale),
+                    ]
+              }
             />
             <meshStandardMaterial
               color={isNextToPlace ? "#4ade80" : "#666"}

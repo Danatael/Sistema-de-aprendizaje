@@ -1,11 +1,12 @@
 "use client"
 
+import { useState } from "react"
 import dynamic from "next/dynamic"
 import { useGameStore } from "@/lib/game-store"
 import { StepPanel, ResetButton } from "@/components/game/step-panel"
 import { ASSEMBLY_STEPS } from "@/lib/pc-parts"
 import { Button } from "@/components/ui/button"
-import { Cpu, ArrowLeft, Brain } from "lucide-react"
+import { Cpu, ArrowLeft, Brain, ZoomIn, ZoomOut } from "lucide-react"
 
 const AssemblyScene = dynamic(
   () => import("@/components/pc-3d/assembly-scene"),
@@ -14,6 +15,15 @@ const AssemblyScene = dynamic(
 
 export function AssemblyPage() {
   const { setView, score, placedParts } = useGameStore()
+  const [zoom, setZoom] = useState(8) // Distancia inicial de la cámara
+
+  const handleZoomIn = () => {
+    setZoom((prev) => Math.max(prev - 1, 5)) // Mínimo 5
+  }
+
+  const handleZoomOut = () => {
+    setZoom((prev) => Math.min(prev + 1, 15)) // Máximo 15
+  }
 
   return (
     <div className="flex h-screen flex-col bg-background">
@@ -56,8 +66,30 @@ export function AssemblyPage() {
       {/* Main Content */}
       <div className="flex flex-1 overflow-hidden">
         {/* 3D Scene */}
-        <div className="flex-1">
-          <AssemblyScene />
+        <div className="relative flex-1">
+          <AssemblyScene zoom={zoom} />
+          
+          {/* Zoom Controls */}
+          <div className="absolute bottom-4 right-4 flex flex-col gap-2">
+            <Button
+              size="icon"
+              variant="secondary"
+              onClick={handleZoomIn}
+              className="h-10 w-10 rounded-full shadow-lg"
+              title="Acercar zoom"
+            >
+              <ZoomIn className="h-5 w-5" />
+            </Button>
+            <Button
+              size="icon"
+              variant="secondary"
+              onClick={handleZoomOut}
+              className="h-10 w-10 rounded-full shadow-lg"
+              title="Alejar zoom"
+            >
+              <ZoomOut className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
 
         {/* Side Panel */}
