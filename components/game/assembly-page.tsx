@@ -127,12 +127,15 @@ function MobileStepBar() {
             <p className="text-xs text-muted-foreground">
               {placedParts.length}/8 componentes
             </p>
+            <p className="text-[11px] text-muted-foreground">
+              Arrastra la pieza hacia su posicion dentro del gabinete.
+            </p>
           </div>
           <Button size="sm" variant="outline" onClick={toggleHint}>
             Pista
           </Button>
           <Button size="sm" onClick={() => placePart(nextPart.id)}>
-            Colocar
+            Auto
           </Button>
         </div>
       )}

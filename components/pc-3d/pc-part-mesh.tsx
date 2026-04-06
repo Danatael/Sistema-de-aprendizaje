@@ -8,8 +8,14 @@ interface PCPartMeshProps {
   isPlaced: boolean
   isAnimating: boolean
   isNextToPlace: boolean
-  onSelect: () => void
+  onSelect?: () => void
   ghostMode?: boolean
+  positionOverride?: [number, number, number]
+  forceVisible?: boolean
+  draggable?: boolean
+  onDragStart?: (partId: string) => void
+  onDragMove?: (partId: string, position: [number, number, number]) => void
+  onDragEnd?: (partId: string, position: [number, number, number]) => void
 }
 
 function CaseMesh() {
@@ -318,10 +324,21 @@ export function PCPartMesh({
   isNextToPlace,
   onSelect,
   ghostMode,
+  positionOverride,
+  forceVisible,
+  draggable,
+  onDragStart,
+  onDragMove,
+  onDragEnd,
 }: PCPartMeshProps) {
   const { useFrame } = require("@react-three/fiber")
   const groupRef = useRef<import("three").Group>(null)
   const [hovered, setHovered] = useState(false)
+  const isDraggingRef = useRef(false)
+  const didDragRef = useRef(false)
+  const dragOffsetRef = useRef<[number, number, number]>([0, 0, 0])
+
+  const displayPosition = positionOverride ?? part.position
 
   useFrame((state: { clock: { elapsedTime: number } }) => {
     if (!groupRef.current) return
@@ -343,16 +360,16 @@ export function PCPartMesh({
 
     if (ghostMode && !isPlaced) {
       groupRef.current.position.y =
-        part.position[1] + Math.sin(state.clock.elapsedTime * 2) * 0.05
+        displayPosition[1] + Math.sin(state.clock.elapsedTime * 2) * 0.05
     }
   })
 
-  if (!isPlaced && !ghostMode) return null
+  if (!isPlaced && !ghostMode && !forceVisible) return null
 
   return (
     <group
       ref={groupRef}
-      position={part.position}
+      position={displayPosition}
       scale={
         part.shape === "case" 
           ? [
@@ -370,7 +387,47 @@ export function PCPartMesh({
       }
       onClick={(e) => {
         e.stopPropagation()
-        onSelect()
+        if (didDragRef.current) {
+          didDragRef.current = false
+          return
+        }
+        onSelect?.()
+      }}
+      onPointerDown={(e) => {
+        if (!draggable) return
+        e.stopPropagation()
+        ;(e.target as Element).setPointerCapture?.(e.pointerId)
+        isDraggingRef.current = true
+        didDragRef.current = false
+        dragOffsetRef.current = [
+          displayPosition[0] - e.point.x,
+          displayPosition[1] - e.point.y,
+          0,
+        ]
+        onDragStart?.(part.id)
+      }}
+      onPointerMove={(e) => {
+        if (!draggable || !isDraggingRef.current) return
+        e.stopPropagation()
+        didDragRef.current = true
+        const nextPosition: [number, number, number] = [
+          e.point.x + dragOffsetRef.current[0],
+          e.point.y + dragOffsetRef.current[1],
+          displayPosition[2],
+        ]
+        onDragMove?.(part.id, nextPosition)
+      }}
+      onPointerUp={(e) => {
+        if (!draggable || !isDraggingRef.current) return
+        e.stopPropagation()
+        ;(e.target as Element).releasePointerCapture?.(e.pointerId)
+        isDraggingRef.current = false
+        const finalPosition: [number, number, number] = [
+          e.point.x + dragOffsetRef.current[0],
+          e.point.y + dragOffsetRef.current[1],
+          displayPosition[2],
+        ]
+        onDragEnd?.(part.id, finalPosition)
       }}
       onPointerOver={(e) => {
         e.stopPropagation()

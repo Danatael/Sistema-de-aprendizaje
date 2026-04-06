@@ -77,6 +77,9 @@ export function StepPanel() {
           <p className="text-sm leading-relaxed text-muted-foreground">
             {currentStepInfo.instruction}
           </p>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Arrastra la pieza desde la zona externa y sueltala dentro del gabinete para colocarla.
+          </p>
 
           {nextPart && (
             <div className="mt-3 flex gap-2">
@@ -86,7 +89,7 @@ export function StepPanel() {
                 className="flex-1 gap-2"
               >
                 {partIcons[nextPart.id]}
-                Colocar {nextPart.nameEs}
+                Auto colocar {nextPart.nameEs}
                 <ChevronRight className="h-4 w-4" />
               </Button>
               <Button

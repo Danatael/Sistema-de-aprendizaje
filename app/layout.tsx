@@ -15,22 +15,8 @@ const _jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: 'PC Builder Academy - Aprende a Armar tu PC',
   description: 'Sistema interactivo de juegos 3D para aprender paso a paso como armar una computadora desde cero.',
-  generator: 'v0.app',
   icons: {
-    icon: [
-      {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
-      },
-    ],
+    icon: '/icon.svg',
     apple: '/apple-icon.png',
   },
 }
