@@ -1,6 +1,7 @@
 "use client"
 
 import dynamic from "next/dynamic"
+import { useRouter } from "next/navigation"
 import { useGameStore } from "@/lib/game-store"
 import { LandingPage } from "@/components/game/landing-page"
 
@@ -20,12 +21,25 @@ const CompleteScreen = dynamic(
 )
 
 export default function Home() {
-  const { currentView, setView } = useGameStore()
+  const router = useRouter()
+  const { currentView } = useGameStore()
+
+  async function handleLogout() {
+    await fetch("/api/auth/logout", { method: "POST" })
+    router.replace("/login")
+    router.refresh()
+  }
 
   console.log("Home renderizado, currentView:", currentView)
 
   return (
     <main className="h-screen overflow-hidden bg-background">
+      <button
+        onClick={handleLogout}
+        className="fixed right-4 top-4 z-50 rounded-md border border-border bg-background/90 px-3 py-1 text-sm text-foreground backdrop-blur transition hover:bg-background"
+      >
+        Cerrar sesion
+      </button>
       {currentView === "landing" && <LandingPage />}
       {currentView === "assembly" && <AssemblyPage />}
       {currentView === "quiz" && <QuizPage />}
