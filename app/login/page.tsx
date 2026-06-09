@@ -1,13 +1,13 @@
 "use client"
 
-import { FormEvent, useState } from "react"
+import { FormEvent, Suspense, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  const [username, setUsername] = useState("")
+  const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
@@ -23,7 +23,7 @@ export default function LoginPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ email, password }),
       })
 
       const result = await response.json().catch(() => ({}))
@@ -35,9 +35,10 @@ export default function LoginPage() {
       }
 
       const nextPath = searchParams.get("next") ?? "/"
-      router.replace(nextPath)
+      await router.replace(nextPath)
       router.refresh()
-    } catch {
+    } catch (err) {
+      console.error("Login error:", err)
       setError("Error de conexion con el backend")
       setLoading(false)
     }
@@ -53,13 +54,13 @@ export default function LoginPage() {
 
           <form onSubmit={onSubmit} className="space-y-4">
             <label className="block text-sm text-slate-200">
-              Usuario
+              Correo
               <input
-                value={username}
-                onChange={(event) => setUsername(event.target.value)}
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
                 autoComplete="username"
                 className="mt-1 w-full rounded-lg border border-slate-600 bg-slate-950 px-3 py-2 text-slate-100 outline-none ring-cyan-400 transition focus:ring"
-                placeholder="admin"
+                placeholder="usuario@dominio.com"
                 required
               />
             </label>
@@ -96,5 +97,13 @@ export default function LoginPage() {
         </section>
       </div>
     </main>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<main className="min-h-screen bg-slate-950" />}>
+      <LoginForm />
+    </Suspense>
   )
 }

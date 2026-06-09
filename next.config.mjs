@@ -7,6 +7,7 @@ const nextConfig = {
     unoptimized: true,
   },
   transpilePackages: ['three', '@react-three/fiber', '@react-three/drei'],
+  allowedDevOrigins: ['192.168.101.50'],
 }
 
 export default nextConfig
