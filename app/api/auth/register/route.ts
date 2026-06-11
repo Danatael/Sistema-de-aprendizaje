@@ -14,21 +14,25 @@ export async function POST(request: Request) {
   const parsed = registerSchema.safeParse(body)
 
   if (!parsed.success) {
+    console.log("Register failed: invalid payload")
     return NextResponse.json({ error: "Datos de registro invalidos" }, { status: 400 })
   }
 
   const { email, password } = parsed.data
   const username = email.toLowerCase()
+  console.log(`Register attempt for user: ${username}`)
 
   try {
     const existing: any = await query('SELECT id FROM users WHERE username = ? LIMIT 1', [username])
     if (Array.isArray(existing) && existing.length > 0) {
+      console.log(`Register failed: user already exists ${username}`)
       return NextResponse.json({ error: "El correo ya existe" }, { status: 409 })
     }
 
     const passwordHash = await createPasswordHash(password, username)
     await query('INSERT INTO users (username, password_hash) VALUES (?, ?)', [username, passwordHash])
 
+    console.log(`Register successful for user: ${username}`)
     const token = await createSessionToken(username)
     const response = NextResponse.json({ ok: true, user: { username } })
     response.cookies.set({ ...sessionCookieOptions, value: token })
