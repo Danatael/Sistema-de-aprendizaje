@@ -1,44 +1,49 @@
-import { NextResponse } from "next/server"
-import { z } from "zod"
-import { createPasswordHash } from "@/lib/auth/crypto"
-import { query } from "@/lib/db"
-import { createSessionToken, sessionCookieOptions } from "@/lib/auth/session"
+import { NextResponse } from "next/server";
+import { z } from "zod";
+import { createPasswordHash } from "@/lib/auth/crypto";
+import { query } from "@/lib/db";
+import { createSessionToken, sessionCookieOptions } from "@/lib/auth/session";
 
 const registerSchema = z.object({
   email: z.string().trim().email(),
   password: z.string().min(8),
-})
+});
 
 export async function POST(request: Request) {
-  const body = await request.json().catch(() => null)
-  const parsed = registerSchema.safeParse(body)
+  const body = await request.json().catch(() => null);
+  const parsed = registerSchema.safeParse(body);
 
   if (!parsed.success) {
-    console.log("Register failed: invalid payload")
-    return NextResponse.json({ error: "Datos de registro invalidos" }, { status: 400 })
+    console.log("Register failed: invalid payload");
+    return NextResponse.json({ error: "Datos de registro inválidos" }, { status: 400 });
   }
 
-  const { email, password } = parsed.data
-  const username = email.toLowerCase()
-  console.log(`Register attempt for user: ${username}`)
+  const { email, password } = parsed.data;
+  const username = email.toLowerCase();
+  console.log(`Register attempt for user: ${username}`);
 
   try {
-    const existing: any = await query('SELECT id FROM users WHERE username = ? LIMIT 1', [username])
+    // Verificar si el usuario ya existe
+    const existing: any = await query("SELECT id FROM users WHERE username = ? LIMIT 1", [username]);
     if (Array.isArray(existing) && existing.length > 0) {
-      console.log(`Register failed: user already exists ${username}`)
-      return NextResponse.json({ error: "El correo ya existe" }, { status: 409 })
+      console.log(`Register failed: user already exists ${username}`);
+      return NextResponse.json({ error: "El correo ya existe" }, { status: 409 });
     }
 
-    const passwordHash = await createPasswordHash(password, username)
-    await query('INSERT INTO users (username, password_hash) VALUES (?, ?)', [username, passwordHash])
+    // Hash de la contraseña (solo la contraseña, sin el email)
+    const passwordHash = await createPasswordHash(password);
+    await query("INSERT INTO users (username, password_hash, created_at, updated_at) VALUES (?, ?, NOW(), NOW())", [
+      username,
+      passwordHash,
+    ]);
 
-    console.log(`Register successful for user: ${username}`)
-    const token = await createSessionToken(username)
-    const response = NextResponse.json({ ok: true, user: { username } })
-    response.cookies.set({ ...sessionCookieOptions, value: token })
-    return response
+    console.log(`Register successful for user: ${username}`);
+    const token = await createSessionToken(username);
+    const response = NextResponse.json({ ok: true, user: { username } });
+    response.cookies.set({ ...sessionCookieOptions, value: token });
+    return response;
   } catch (error) {
-    console.error("Register error:", error)
-    return NextResponse.json({ error: "No se pudo registrar el usuario" }, { status: 500 })
+    console.error("Register error:", error);
+    return NextResponse.json({ error: "No se pudo registrar el usuario" }, { status: 500 });
   }
 }
