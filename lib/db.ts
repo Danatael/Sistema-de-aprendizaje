@@ -1,6 +1,6 @@
 import { createPool, Pool } from 'mysql2/promise'
 
-const DATABASE_URL = process.env.DATABASE_URL || 'mysql://pc3d:012345678@localhost:3306/ps3d'
+const DATABASE_URL = process.env.DATABASE_URL || 'mysql://pc3d:012345678@127.0.0.1:3306/ps3d'
 
 let pool: Pool | null = null
 

@@ -19,15 +19,19 @@ export async function middleware(request: NextRequest) {
   }
 
   const isLoginPage = pathname === "/login"
-  const isPublicAuthApi = pathname === "/api/auth/login" || pathname === "/api/auth/logout"
+  const isRegisterPage = pathname === "/register"
+  const isPublicAuthApi =
+    pathname === "/api/auth/login" ||
+    pathname === "/api/auth/logout" ||
+    pathname === "/api/auth/register"
   const token = request.cookies.get(SESSION_COOKIE)?.value
   const session = await readSessionToken(token)
 
-  if (isLoginPage && session) {
+  if ((isLoginPage || isRegisterPage) && session) {
     return NextResponse.redirect(new URL("/", request.url))
   }
 
-  if (isLoginPage || isPublicAuthApi) {
+  if (isLoginPage || isRegisterPage || isPublicAuthApi) {
     return NextResponse.next()
   }
 
